@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema({
         trim: true
     },
     description: {
-        type: String, 
+        type: String,
         required: [true, 'Please enter product description']
     },
     price: {
@@ -38,10 +38,20 @@ const productSchema = new mongoose.Schema({
     stock: {
         type: Number,
         required: [true, 'Please enter the product stock'],
+        maxLength: [4, 'Stock cannot exceed 4 characters'],
         default: 0
     },
-    numOfReviews: [
+    numOfReviews: {
+        type: Number,
+        default: 0
+    },
+    reviews: [
         {
+            user: {
+                type: mongoose.Schema.ObjectId,
+                ref: 'User',
+                required: true
+            },
             name: {
                 type: String,
                 required: true
@@ -51,7 +61,7 @@ const productSchema = new mongoose.Schema({
                 required: true
             },
             comment: {
-                type: Number,
+                type: String,
                 required: true
             }
         }
@@ -65,6 +75,6 @@ const productSchema = new mongoose.Schema({
     //     type: Date,
     //     default: Date.now
     // }
-}, {timestamps: true});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

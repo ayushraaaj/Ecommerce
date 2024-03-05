@@ -5,7 +5,7 @@ const app = express();
 const errorHandler = require('./middleware/error');
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Route Imports

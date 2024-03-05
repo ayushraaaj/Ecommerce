@@ -76,3 +76,87 @@ exports.deleteProduct = catchAsyncErrors(async (req, res, next) => {
         message: 'Product deleted successfully'
     });
 });
+
+// Create new review or Update the review
+exports.createProductReview = catchAsyncErrors(async (req, res, next) => {
+    const { rating, comment, productId } = req.body;
+
+    const review = {
+        user: req.user.id,
+        name: req.user.name,
+        // rating: Number(rating),
+        rating,
+        comment
+    }
+
+    const product = await Product.findById(productId);
+
+    const isReviewed = product.reviews.find(rev => rev.user.toString() === req.user.id.toString());
+
+    if(isReviewed){
+        product.reviews.forEach(rev => {
+            if(rev.user.toString() === req.user.id.toString()){
+                rev.rating = rating;
+                rev.comment = comment;
+            }
+        });
+    }
+    else{
+        product.reviews.push(review);
+        product.numOfReviews = product.reviews.length;
+    }
+
+    let sum = 0;
+    product.reviews.forEach(rev => {
+        sum += rev.rating;
+    });
+
+    product.ratings = sum / product.reviews.length;
+
+    await product.save({validateBeforeSave: false});
+
+    res.status(200).json({
+        success: true
+    });
+});
+
+// Get all reviews of a product
+exports.getProductReviews = catchAsyncErrors(async (req, res, next) => {
+    const product = await Product.findById(req.query.id);
+
+    if(!product){
+        return next(new ErrorHandler('Product not found', 404));
+    }
+
+    res.status(200).json({
+        success: true,
+        reiews: product.reviews
+    });
+});
+
+// Delete Review
+exports.deleteReview = catchAsyncErrors(async (req, res, next) => {
+    const product = await Product.findById(req.query.productId);
+
+    if(!product){
+        return next(new ErrorHandler('Product not found', 404));
+    }
+
+    const reviews = product.reviews.filter(rev => rev._id.toString() !== req.query.id.toString());
+
+    let sum = 0;
+    reviews.forEach(rev => {
+        sum += rev.rating;
+    });
+
+    product.ratings = sum / reviews.length
+    product.numOfReviews = product.reviews.length;
+    product.reviews = reviews;
+
+    //first use normal saving other than findByIdAndUpdate
+    await product.save();
+
+    res.status(200).json({
+        success: true
+    });
+});

@@ -124,8 +124,8 @@ exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
     sendToken(user, 200, res);
 });
 
-// Get User Details
-exports.getUserDetails = catchAsyncErrors(async (req, res, next) => {
+// Get My Details
+exports.getMyDetails = catchAsyncErrors(async (req, res, next) => {
     const user = await User.findById(req.user.id);
 
     res.status(200).json({
@@ -172,5 +172,69 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
     res.status(200).json({
         success: true,
         user
+    });
+});
+
+// Get All Users -- Admin
+exports.getAllUsers = catchAsyncErrors(async (req, res, next) => {
+    const users = await User.find();
+
+    res.status(200).json({
+        success: true,
+        users
+    });
+});
+
+// Get Single User details -- Admin
+exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+        return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 400));
+    }
+
+    res.status(200).json({
+        success: true,
+        user
+    });
+});
+
+// Update User Role -- Admin
+exports.updateUserRole = catchAsyncErrors(async (req, res, next) => {
+    const newUserData = {
+        name: req.body.name,
+        email: req.body.email,
+        role: req.body.role
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false
+    });
+
+    if (!user) {
+        return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 400));
+    }
+
+    res.status(200).json({
+        success: true,
+        user
+    });
+});
+
+// Delete User -- Admin
+exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    // will remove cloudinary later
+
+    if (!user) {
+        return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`));
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'User deleted successfully'
     });
 });
