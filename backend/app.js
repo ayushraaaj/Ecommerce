@@ -11,9 +11,11 @@ app.use(cookieParser());
 // Route Imports
 const product = require('./routers/productRouter');
 const user = require('./routers/userRouter');
+const order = require('./routers/orderRouter');
 
 app.use('/api/v1', product);
 app.use('/api/v1', user);
+app.use('/api/v1', order);
 
 // Middleware for Errors
 app.use(errorHandler);
